@@ -1,30 +1,31 @@
 import csv
+from collections import defaultdict
 
 def count_votes(file_path):
-    results = {}
+    results = defaultdict(int)
     
     with open(file_path, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        next(reader)  # Skip the header
-
+        reader = csv.DictReader(csvfile)
+        
         for row in reader:
-            city = row[0]
-            candidate = row[1]
+            candidate = row["candidate"]
             try:
-            	votes = int(row[2])
-            except:
-                votes = 0
+                votes = int(row["votes"])
+            except ValueError:
+                print(f"Advertencia: votos inválidos para {candidate} en {row['city']}")
+                continue
             
-            if candidate in results:
-                results[candidate] += votes
-            else:
-                results[candidate] = votes
+            results[candidate] += votes
 
     for candidate, total_votes in results.items():
-        print(f"{candidate}: {total_votes} votes")
-
-    sortedbyvotes = sorted(results.items(), key=lambda item:item[1], reverse=True)
-    print(f"winner is {sortedbyvotes[0][0]}")
-
-# Example usage
-count_votes('votes.csv')
+        print(f"{candidate}: {total_votes} votos")
+    
+    sorted_results = sorted(results.items(), key=lambda item: item[1], reverse=True)
+    
+    if len(sorted_results) > 1 and sorted_results[0][1] == sorted_results[1][1]:
+        print("Hay un empate entre los candidatos:")
+        for candidate, votes in sorted_results:
+            if votes == sorted_results[0][1]:
+                print(f"{candidate} con {votes} votos")
+    else:
+        print(f"El ganador es {sorted_results[0][0]} con {sorted_results[0][1]} votos")
