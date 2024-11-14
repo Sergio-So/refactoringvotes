@@ -39,6 +39,22 @@ class TestVoteCounter(unittest.TestCase):
         mock_print.assert_any_call("winner is Bob")
         self.assertEqual(mock_print.call_count, 3)
 
+        @patch("builtins.print")
+    def test_count_votes_tie(self, mock_print):
+        # Simulamos un archivo CSV con un empate entre dos candidatos
+        mock_csv = """city,candidate,votes
+        Springfield,Alice,1500
+        Springfield,Bob,1500"""
+        with patch("builtins.open", mock_open(read_data=mock_csv)):
+            count_votes("votes.csv")
+
+        mock_print.assert_any_call("Alice: 1500 votos")
+        mock_print.assert_any_call("Bob: 1500 votos")
+        mock_print.assert_any_call("Hay un empate entre los candidatos:")
+        mock_print.assert_any_call("Alice con 1500 votos")
+        mock_print.assert_any_call("Bob con 1500 votos")
+        self.assertEqual(mock_print.call_count, 5)
+
 if __name__ == "__main__":
     unittest.main()
 
